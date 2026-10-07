@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
@@ -56,6 +58,8 @@ import com.pemmob.gamedex.ui.components.GenreChips
 import com.pemmob.gamedex.ui.theme.RatingGold
 import java.util.Locale
 
+private const val POPULAR_COUNT = 4
+
 sealed interface HomeUiState {
     data object Loading : HomeUiState
     data class Success(val games: List<Game>) : HomeUiState
@@ -68,6 +72,7 @@ fun HomeScreen(
     query: String,
     onQueryChange: (String) -> Unit,
     onGameClick: (Game) -> Unit,
+    onSeeAllClick: () -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -111,7 +116,12 @@ fun HomeScreen(
                                 modifier = Modifier.align(Alignment.Center)
                             )
                         } else {
-                            GameList(games = uiState.games, onGameClick = onGameClick)
+                            GameList(
+                                games = uiState.games,
+                                isSearching = query.isNotBlank(),
+                                onGameClick = onGameClick,
+                                onSeeAllClick = onSeeAllClick
+                            )
                         }
                     }
                 }
@@ -140,7 +150,7 @@ private fun HomeHeader(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun SearchField(
+internal fun SearchField(
     query: String,
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -174,46 +184,78 @@ private fun SearchField(
 @Composable
 private fun GameList(
     games: List<Game>,
+    isSearching: Boolean,
     onGameClick: (Game) -> Unit,
+    onSeeAllClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val rows = games.chunked(2)
+    val shown = if (isSearching) games else games.take(POPULAR_COUNT)
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Text(
-                text = "Popular Games",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        }
-        items(rows, key = { it.first().id }) { rowGames ->
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                rowGames.forEach { game ->
-                    GameItem(
-                        game = game,
-                        onClick = { onGameClick(game) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                    )
+                Text(
+                    text = if (isSearching) "Search Results" else "Popular Games",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                if (!isSearching) {
+                    Row(
+                        modifier = Modifier.clickable(onClick = onSeeAllClick),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "See all",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
-                if (rowGames.size == 1) Spacer(Modifier.weight(1f))
             }
+        }
+        gameRows(games = shown, onGameClick = onGameClick)
+    }
+}
+
+internal fun LazyListScope.gameRows(
+    games: List<Game>,
+    onGameClick: (Game) -> Unit
+) {
+    items(games.chunked(2), key = { it.first().id }) { rowGames ->
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            rowGames.forEach { game ->
+                GameItem(
+                    game = game,
+                    onClick = { onGameClick(game) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                )
+            }
+            if (rowGames.size == 1) Spacer(Modifier.weight(1f))
         }
     }
 }
 
 @Composable
-private fun GameItem(
+internal fun GameItem(
     game: Game,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -299,7 +341,7 @@ fun RatingBadge(
 }
 
 @Composable
-private fun ErrorContent(
+internal fun ErrorContent(
     message: String,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier

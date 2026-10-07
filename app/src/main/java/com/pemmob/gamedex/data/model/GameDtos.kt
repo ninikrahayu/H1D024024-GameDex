@@ -6,6 +6,7 @@ import com.pemmob.gamedex.model.Game
 
 data class GameListResponse(
     @SerializedName("count") val count: Int,
+    @SerializedName("next") val next: String?,
     @SerializedName("results") val results: List<GameItemDto>
 )
 

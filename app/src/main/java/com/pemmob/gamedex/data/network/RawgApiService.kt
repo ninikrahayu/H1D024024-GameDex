@@ -13,7 +13,8 @@ interface RawgApiService {
     suspend fun getGames(
         @Query("key") apiKey: String = BuildConfig.RAWG_API_KEY,
         @Query("search") search: String? = null,
-        @Query("page_size") pageSize: Int = 20
+        @Query("page_size") pageSize: Int = 20,
+        @Query("page") page: Int = 1
     ): GameListResponse
 
     @GET("games/{id}")
