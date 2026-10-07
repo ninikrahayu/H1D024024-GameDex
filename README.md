@@ -166,3 +166,11 @@ Kalau key belum diisi, aplikasi tetap bisa dibuild, tapi daftar game tidak akan 
 ## Sumber Data
 
 Seluruh data game berasal dari [RAWG.io](https://rawg.io).
+
+## Tampilan Aplikasi
+
+<img src="https://github.com/user-attachments/assets/2c368b69-0b68-4254-80e4-59976ae5eac2" width="220" alt="Home" />
+<img src="https://github.com/user-attachments/assets/dc319c63-9774-4e58-8d50-58d06cf4bb95" width="220" alt="All Games" />
+<img src="https://github.com/user-attachments/assets/a49ebd1e-b70d-4e63-ad62-6b1388172705" width="220" alt="Search" />
+<img src="https://github.com/user-attachments/assets/1c80a5cc-54f9-419a-a351-4ed3d8157067" width="220" alt="Detail" />
+
